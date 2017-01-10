@@ -217,11 +217,18 @@ def profile():
     return render_template('profile.html')
 
 
-@app.route('/post')
+@app.route('/post/')
+@app.route('/post/<int:id>', methods=['GET', 'POST'])
 @login_required
 @check_confirmed
-def post():
-    return render_template('blogPost.html')
+def post(id):
+    Session = sessionmaker(bind=engine)
+    s = Session()
+    post = s.query(Post).filter(Post.id == id)
+    user = s.query(User).from_self().join(User.posts)
+    if post is None:
+        print(False)
+    return render_template('blogPost.html', post=post,user=user)
 
 
 @app.route('/unconfirmed')
