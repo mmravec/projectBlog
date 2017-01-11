@@ -235,17 +235,21 @@ def post(id):
         predictionP = NB.make_class_prediction(request.form['comment'], NB.positive_counts, NB.prob_positive, NB.positive_review_count)
 
         if predictionN > predictionP:
-            variable = predictionN - (predictionN * 0.05)
-            if variable < predictionP:
-                status = 'Neutral'
-            else:
-                status = 'Negative'
+            status = 'Negative'
         else:
-            variable = predictionP - (predictionP * 0.05)
-            if variable < predictionP:
-                status = 'Neutral'
-            else:
-                status = 'Positive'
+            status = 'Positive'
+        # if predictionN > predictionP:
+        #     variable = predictionN - (predictionN * 0.05)
+        #     if variable < predictionP:
+        #         status = 'Neutral'
+        #     else:
+        #         status = 'Negative'
+        # else:
+        #     variable = predictionP - (predictionP * 0.05)
+        #     if variable > predictionP:
+        #         status = 'Neutral'
+        #     else:
+        #         status = 'Positive'
         comment = Comment(request.form['comment'], status, id, request.form['userId'])
         s.add(comment)
         s.commit()
