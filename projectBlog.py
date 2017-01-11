@@ -11,6 +11,7 @@ from model_db import *
 from functools import wraps
 from werkzeug.utils import secure_filename
 import os
+from prediction import NB
 
 engine = create_engine('mysql+mysqlconnector://root:@localhost/blog', echo=True)
 UPLOAD_DIR = os.path.dirname(os.path.realpath(__file__)) + '/static/postPictures'
@@ -226,9 +227,32 @@ def post(id):
     s = Session()
     post = s.query(Post).filter(Post.id == id)
     user = s.query(User).from_self().join(User.posts)
-    if post is None:
-        print(False)
-    return render_template('blogPost.html', post=post,user=user)
+
+
+    if request.method == 'POST':
+
+        predictionN = NB.make_class_prediction(request.form['comment'], NB.negative_counts, NB.prob_negative, NB.negative_review_count)
+        predictionP = NB.make_class_prediction(request.form['comment'], NB.positive_counts, NB.prob_positive, NB.positive_review_count)
+
+        if predictionN > predictionP:
+            variable = predictionN - (predictionN * 0.05)
+            if variable < predictionP:
+                status = 'Neutral'
+            else:
+                status = 'Negative'
+        else:
+            variable = predictionP - (predictionP * 0.05)
+            if variable < predictionP:
+                status = 'Neutral'
+            else:
+                status = 'Positive'
+        comment = Comment(request.form['comment'], status, id, request.form['userId'])
+        s.add(comment)
+        s.commit()
+        flash('Thanks for post')
+
+    comment = s.query(Comment).filter(Comment.post_id == id)
+    return render_template('blogPost.html', post=post,user=user, comment=comment)
 
 
 @app.route('/unconfirmed')
@@ -264,7 +288,7 @@ def add_new_post():
     if request.method == 'POST':
         title = request.form['title']
         body = request.form['body']
-        print(body.rsplit('?', 1)[0])
+        # print(body.rsplit('?', 1)[0])
         file = request.files['file']
         drop_down = request.form['userId']
 

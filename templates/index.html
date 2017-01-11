@@ -93,13 +93,13 @@
         <div class="col-md-8">
             {% for post in post %}
                 <h1 class="page-header">
-                    Page Heading
-                    <small>Secondary Text</small>
+                    <a href="#">{{ post.title }}</a>
+
                 </h1>
 
                 <!-- First Blog Post -->
                 <h2>
-                    <a href="#">{{ post.title }}</a>
+
                 </h2>
                 <p class="lead">
                     by <a href="{{ url_for('profile') }}">{{ post.users.username }}</a>

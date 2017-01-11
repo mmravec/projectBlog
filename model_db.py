@@ -19,6 +19,7 @@ class User(Base):
     confirmed = Column('confirmed', BOOLEAN, nullable=False, default=False)
     confirmed_on = Column('confirmed_on', DATETIME, nullable=True)
     posts = relationship('Post', backref=backref('users'), lazy='dynamic')
+    comments_rel = relationship('Comment', backref=backref('users'), lazy='dynamic')
 
     def __init__(self, username, password, email, confirmed, confirmed_on=None):
         self.username = username
@@ -65,5 +66,25 @@ class Post(Base):
 
     def __repr__(self):
         return '<post %r>' % self.title
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+    id = Column(Integer, primary_key=True)
+    comment = Column(VARCHAR(250), nullable=False)
+    created = Column(DATETIME)
+    status = Column(VARCHAR(25), nullable=False)
+    post_id = Column(Integer, ForeignKey('post.id'))
+    user_id = Column(Integer, ForeignKey('users.used_id'))
+
+    def __init__(self, comment, status, post_id, user_id):
+        self.comment = comment
+        self.created = datetime.utcnow()
+        self.status = status
+        self.post_id = post_id
+        self.user_id = user_id
+
+    def __repr__(self):
+        return '<comment %r>' % self.comment
 
 Base.metadata.create_all(engine)
