@@ -1,7 +1,7 @@
 from flask import Flask, render_template, session, request, flash, url_for, redirect, render_template, abort, g
 from flask_login import login_user, login_required, current_user, logout_user
 from flask_login import LoginManager
-from sqlalchemy import desc
+from sqlalchemy import desc, exc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -12,8 +12,10 @@ from functools import wraps
 from werkzeug.utils import secure_filename
 import os
 from prediction import NB
+import urllib.parse
 
-engine = create_engine('mysql+mysqlconnector://root:@localhost/blog', echo=True)
+engine = create_engine('mssql+pyodbc://mmravec:DrMT62Kb!@blogtest1.database.windows.net:1433/mssqldb?driver=/usr/local/lib/libtdsodbc.so')
+
 UPLOAD_DIR = os.path.dirname(os.path.realpath(__file__)) + '/static/postPictures'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
@@ -71,6 +73,7 @@ def register():
     confirm_url = url_for('confirm_email', token=token, _external=True)
     html = render_template('activate.html', confirm_url=confirm_url)
     subject = "Please confirm your email."
+    s.close()
     try:
         send_email(user.email, subject, html)
         login_user(user)
@@ -101,6 +104,7 @@ def confirm_email(token):
         user.confirmed_on = datetime.utcnow()
         s.add(user)
         s.commit()
+        s.close()
         flash('You have confirmed your account. Thanks!', 'success')
     return redirect(url_for('index'))
 
@@ -207,7 +211,7 @@ def index():
     s = Session()
     post = s.query(Post).order_by(desc(Post.id))
     user = s.query(User).from_self().join(User.posts)
-
+    s.close()
     return render_template('index.html',  user=user, post=post)
 
 
@@ -227,7 +231,6 @@ def post(id):
     s = Session()
     post = s.query(Post).filter(Post.id == id)
     user = s.query(User).from_self().join(User.posts)
-
 
     if request.method == 'POST':
 
@@ -256,6 +259,7 @@ def post(id):
         flash('Thanks for post')
 
     comment = s.query(Comment).filter(Comment.post_id == id)
+    s.close()
     return render_template('blogPost.html', post=post,user=user, comment=comment)
 
 
@@ -322,6 +326,7 @@ def add_new_post():
 
             s.add(post)
             s.commit()
+            s.close()
             flash('Thanks for post')
         else:
             flash('Error: All fields are required!!!')

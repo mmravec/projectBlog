@@ -1,11 +1,27 @@
 from sqlalchemy import create_engine, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy import Column, Integer, DATETIME, VARCHAR, BOOLEAN, TEXT
+from sqlalchemy import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import pyodbc
+import urllib
 
-engine = create_engine('mysql+mysqlconnector://root:@localhost/blog', echo=True)
+"""
+
+params = urllib.quote_plus('Driver={ODBC Driver 13 for SQL Server};Server=tcp:blogtest1.database.windows.net,1433;Database=mssqldb;Uid=mmravec@blogtest1;Pwd=DrMT62Kb!;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;')
+engine = create_engine('mssql+pyodbc:///?odbc_connect=%s' % params)
+
+DRIVER=/usr/local/lib/libtdsodbc.so
+"""
+# params = urllib.quote_plus('Driver={ODBC Driver 13 for SQL Server};Server=tcp:blogtest1.database.windows.net,1433;Database=mssqldb;Uid=mmravec@blogtest1;Pwd=DrMT62Kb!;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;')
+
+
+
+#params = urllib.quote("DRIVER=/usr/local/lib/libtdsodbc.so;SERVER=blogtest1.database.windows.net;DATABASE=mssqldb;UID=mmravec;PWD=DrMT62Kb!")
+
+engine = create_engine('mssql+pyodbc://mmravec:DrMT62Kb!@blogtest1.database.windows.net:1433/mssqldb?driver=/usr/local/lib/libtdsodbc.so')
+#engine = create_engine('mysql+mysqlconnector://root:@localhost/blog', echo=True)
 Base = declarative_base()
 
 
@@ -16,8 +32,9 @@ class User(Base):
     password = Column('password', VARCHAR(250))
     email = Column('email', VARCHAR(50), unique=True, index=True)
     registred_on = Column('registred_on', DATETIME)
-    confirmed = Column('confirmed', BOOLEAN, nullable=False, default=False)
+    confirmed = Column('confirmed', Boolean, nullable=False, default=False)
     confirmed_on = Column('confirmed_on', DATETIME, nullable=True)
+
     posts = relationship('Post', backref=backref('users'), lazy='dynamic')
     comments_rel = relationship('Comment', backref=backref('users'), lazy='dynamic')
 
