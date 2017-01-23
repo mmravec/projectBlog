@@ -40,6 +40,9 @@
         .row {
             margin-top: 30px;
         }
+        .well{
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
 
     </style>
 
@@ -74,7 +77,7 @@
                     <a href="#">Contact</a>
                 </li>
                 {% if current_user.confirmed and current_user.is_authenticated() %}
-                    <li><a  href="{{ url_for('logout') }}">Logout</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 {% elif current_user.is_authenticated() %}
                     <li><a href="{{ url_for('unconfirmed') }}">Confirm</a></li>
                 {% elif current_user.is_authenticated() %}
@@ -113,7 +116,10 @@
         <br/>
         <i class="glyphicon glyphicon-list-alt"></i>Posts: {{ post }}
         <br/>
-        <i class="glyphicon glyphicon-pushpin"></i>Comments: {{ comment }} [<i class="glyphicon glyphicon-thumbs-up"></i>{{ positive }}	<i style="margin-left:1em;" class="glyphicon glyphicon-thumbs-down"></i>{{ negative }} ]
+        <i class="glyphicon glyphicon-pushpin"></i>Comments: {{ comment }} [<i
+            class="glyphicon glyphicon-thumbs-up"></i>{{ positive }} <i style="margin-left:1em;"
+                                                                        class="glyphicon glyphicon-thumbs-down"></i>{{ negative }}
+        ]
 
         </p>
 
