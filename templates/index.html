@@ -67,8 +67,8 @@
                     {% if current_user.confirmed and current_user.is_authenticated() %}
                         <li><a href="{{ url_for('add_new_post') }}">New post</a></li>
                         <li><a style="margin-left: 450px"
-                               href="{{ url_for('profile') }}">{{ current_user.username }}</a></li>
-                        <li><a>/</a></li>
+                               href="{{ url_for('profile', id=current_user.id) }}">{{ current_user.username }}</a></li>
+
                         <li><a style="margin-left: 5px" href="{{ url_for('logout') }}">Logout</a></li>
                     {% elif current_user.is_authenticated() %}
                         <li><a href="{{ url_for('unconfirmed') }}">Confirm</a></li>
@@ -102,14 +102,16 @@
 
                 </h2>
                 <p class="lead">
-                    by <a href="{{ url_for('profile') }}">{{ post.users.username }}</a>
+                    Author: {{ post.users.username }}
                 </p>
                 <p><span class="glyphicon glyphicon-time"></span> {{ post.created }}</p>
                 <hr>
-                <img class="img-responsive" src="/static/postPictures/{{ post.file }}" alt="">
+                <img class="img-responsive" style="width: 900px; height: 300px"
+                     src="/static/postPictures/{{ post.file }}" alt="">
                 <hr>
                 <p>{{ post.body }}</p>
-                <a class="btn btn-primary" href="{{ url_for('post', id=post.id)  }}">Read More {{ post.id }} <span class="glyphicon glyphicon-chevron-right"></span></a>
+                <a class="btn btn-primary" href="{{ url_for('post', id=post.id) }}">Read More {{ post.id }} <span
+                        class="glyphicon glyphicon-chevron-right"></span></a>
 
                 <hr>
             {% endfor %}
@@ -133,36 +135,21 @@
             </div>
 
             <!-- Blog Categories Well -->
-            <div class="well">
-                <h4>Blog Categories</h4>
-                <div class="row">
-                    <div class="col-lg-6">
-                        <ul class="list-unstyled">
-                            <li><a href="#">Category Name</a>
-                            </li>
-                            <li><a href="#">Category Name</a>
-                            </li>
-                            <li><a href="#">Category Name</a>
-                            </li>
-                            <li><a href="#">Category Name</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <!-- /.col-lg-6 -->
-                    <div class="col-lg-6">
-                        <ul class="list-unstyled">
-                            <li><a href="#">Category Name</a>
-                            </li>
-                            <li><a href="#">Category Name</a>
-                            </li>
-                            <li><a href="#">Category Name</a>
-                            </li>
-                            <li><a href="#">Category Name</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <!-- /.col-lg-6 -->
-                </div>
+            <div class="well" style="text-align: center">
+                <h4>Most commented post</h4>
+                <hr style="color: #8c8c8c">
+
+                {% for post in post %}
+                    <ul class="list-unstyled">
+                        <li><a style="text-align: center" href="#">{{ post.title }}</a>
+                        </li>
+                    </ul>
+                {% endfor %}
+
+                <!-- /.col-lg-6 -->
+
+                <!-- /.col-lg-6 -->
+
                 <!-- /.row -->
             </div>
 

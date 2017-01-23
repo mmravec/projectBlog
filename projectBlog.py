@@ -14,7 +14,7 @@ import os
 from prediction import NB
 import urllib.parse
 
-engine = create_engine('mssql+pyodbc://mmravec:DrMT62Kb!@blogtest1.database.windows.net:1433/mssqldb?driver=/usr/local/lib/libtdsodbc.so')
+engine = create_engine('mssql+pyodbc://@blogtest1.database.windows.net:1433/mssqldb?driver=/usr/local/lib/libtdsodbc.so')
 
 UPLOAD_DIR = os.path.dirname(os.path.realpath(__file__)) + '/static/postPictures'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -36,8 +36,7 @@ app.config.update(
     MAIL_USE_SSL=True,
 
     # mail accounts
-    MAIL_USERNAME='martinmravec4@gmail.com',
-    MAIL_PASSWORD='asdfghjkl123qwert'
+    
 )
 
 login_manager = LoginManager()
@@ -73,7 +72,6 @@ def register():
     confirm_url = url_for('confirm_email', token=token, _external=True)
     html = render_template('activate.html', confirm_url=confirm_url)
     subject = "Please confirm your email."
-    s.close()
     try:
         send_email(user.email, subject, html)
         login_user(user)
@@ -104,7 +102,6 @@ def confirm_email(token):
         user.confirmed_on = datetime.utcnow()
         s.add(user)
         s.commit()
-        s.close()
         flash('You have confirmed your account. Thanks!', 'success')
     return redirect(url_for('index'))
 
@@ -170,7 +167,6 @@ def check_confirmed(func):
             flash('Please confirm your account!', 'warning')
             return redirect(url_for('unconfirmed'))
         return func(*args, **kwargs)
-
     return decorated_function
 
 
@@ -211,15 +207,24 @@ def index():
     s = Session()
     post = s.query(Post).order_by(desc(Post.id))
     user = s.query(User).from_self().join(User.posts)
-    s.close()
+
     return render_template('index.html',  user=user, post=post)
 
 
-@app.route('/profile', methods=['GET', 'POST'])
+@app.route('/profile')
+@app.route('/profile/<int:id>', methods=['GET', 'POST'])
 @login_required
 @check_confirmed
-def profile():
-    return render_template('profile.html')
+def profile(id):
+    Session = sessionmaker(bind=engine)
+    s = Session()
+    post = s.query(Post).filter(Post.user_id == id).count()
+    comment = s.query(Comment).filter(Comment.user_id == id).count()
+    positive = s.query(Comment).filter(Comment.user_id == id).filter(Comment.status == 'Positive').count()
+    negative = s.query(Comment).filter(Comment.user_id == id).filter(Comment.status == 'Negative').count()
+    if id != current_user.id:
+        return render_template('noAccess.html')
+    return render_template('profile.html', post=post, comment=comment, positive=positive, negative=negative)
 
 
 @app.route('/post/')
@@ -229,11 +234,10 @@ def profile():
 def post(id):
     Session = sessionmaker(bind=engine)
     s = Session()
-    post = s.query(Post).filter(Post.id == id)
-    user = s.query(User).from_self().join(User.posts)
-
+    if_exist = s.query(Post).filter(Post.id == id).count()
+    if if_exist == 0:
+        return render_template('noAccess.html')
     if request.method == 'POST':
-
         predictionN = NB.make_class_prediction(request.form['comment'], NB.negative_counts, NB.prob_negative, NB.negative_review_count)
         predictionP = NB.make_class_prediction(request.form['comment'], NB.positive_counts, NB.prob_positive, NB.positive_review_count)
 
@@ -258,9 +262,10 @@ def post(id):
         s.commit()
         flash('Thanks for post')
 
+    post = s.query(Post).filter(Post.id == id)
+    user = s.query(User).from_self().join(User.posts)
     comment = s.query(Comment).filter(Comment.post_id == id)
-    s.close()
-    return render_template('blogPost.html', post=post,user=user, comment=comment)
+    return render_template('blogPost.html', post=post, user=user, comment=comment)
 
 
 @app.route('/unconfirmed')
@@ -292,7 +297,6 @@ def resend_confirmation():
 @check_confirmed
 def add_new_post():
     filename = None  # default
-
     if request.method == 'POST':
         title = request.form['title']
         body = request.form['body']
@@ -318,18 +322,15 @@ def add_new_post():
         # TO DO create better validator
         # if title or body is null do not add to db
         if (title is not None) and (body is not None):
-            print("True")
-
             Session = sessionmaker(bind=engine)
             s = Session()
             post = Post(request.form['title'], request.form['body'], filename, request.form['userId'])
 
             s.add(post)
             s.commit()
-            s.close()
             flash('Thanks for post')
         else:
-            flash('Error: All fields are required!!!')
+            return render_template('error404.html')
     return render_template('createNew.html')
 
 if __name__ == '__main__':

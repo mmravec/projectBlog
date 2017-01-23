@@ -20,7 +20,7 @@ DRIVER=/usr/local/lib/libtdsodbc.so
 
 #params = urllib.quote("DRIVER=/usr/local/lib/libtdsodbc.so;SERVER=blogtest1.database.windows.net;DATABASE=mssqldb;UID=mmravec;PWD=DrMT62Kb!")
 
-engine = create_engine('mssql+pyodbc://mmravec:DrMT62Kb!@blogtest1.database.windows.net:1433/mssqldb?driver=/usr/local/lib/libtdsodbc.so')
+engine = create_engine('mssql+pyodbc://@blogtest1.database.windows.net:1433/mssqldb?driver=/usr/local/lib/libtdsodbc.so')
 #engine = create_engine('mysql+mysqlconnector://root:@localhost/blog', echo=True)
 Base = declarative_base()
 

@@ -29,5 +29,20 @@ DateCreate
 StatusAI
 
 
-
+dj-database-url==0.4.1
+Django==1.9.7
+Flask==0.12
+Flask-Login==0.4.0
+Flask-Mail==0.9.1
+Flask-SQLAlchemy==2.1
+Jinja2==2.9.4
+SQLAlchemy==1.1.4
+WTForms==2.1
+Werkzeug==0.11.15
+numpy==1.12.0rc2
+pip==9.0.1
+pyodbc==4.0.1
+gunicorn==19.6.0
+psycopg2==2.6.1
+whitenoise==2.0.6
 
