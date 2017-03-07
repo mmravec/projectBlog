@@ -7,20 +7,10 @@ from datetime import datetime
 import pyodbc
 import urllib
 
-"""
+# engine for mssql
+engine = create_engine('mssql+pyodbc://:@blogtest1.database.windows.net:1433/mssqldb?driver=/usr/local/lib/libtdsodbc.so')
 
-params = urllib.quote_plus('Driver={ODBC Driver 13 for SQL Server};Server=tcp:blogtest1.database.windows.net,1433;Database=mssqldb;Uid=mmravec@blogtest1;Pwd=DrMT62Kb!;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;')
-engine = create_engine('mssql+pyodbc:///?odbc_connect=%s' % params)
-
-DRIVER=/usr/local/lib/libtdsodbc.so
-"""
-# params = urllib.quote_plus('Driver={ODBC Driver 13 for SQL Server};Server=tcp:blogtest1.database.windows.net,1433;Database=mssqldb;Uid=mmravec@blogtest1;Pwd=DrMT62Kb!;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;')
-
-
-
-#params = urllib.quote("DRIVER=/usr/local/lib/libtdsodbc.so;SERVER=blogtest1.database.windows.net;DATABASE=mssqldb;UID=mmravec;PWD=DrMT62Kb!")
-
-engine = create_engine('mssql+pyodbc://@blogtest1.database.windows.net:1433/mssqldb?driver=/usr/local/lib/libtdsodbc.so')
+# engine for myslq
 #engine = create_engine('mysql+mysqlconnector://root:@localhost/blog', echo=True)
 Base = declarative_base()
 
@@ -104,4 +94,6 @@ class Comment(Base):
     def __repr__(self):
         return '<comment %r>' % self.comment
 
-Base.metadata.create_all(engine)
+
+
+

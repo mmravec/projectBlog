@@ -14,7 +14,7 @@ import os
 from prediction import NB
 import urllib.parse
 
-engine = create_engine('mssql+pyodbc://@blogtest1.database.windows.net:1433/mssqldb?driver=/usr/local/lib/libtdsodbc.so')
+engine = create_engine('mssql+pyodbc://mmravec:DrMT62Kb!@blogtest1.database.windows.net:1433/mssqldb?driver=/usr/local/lib/libtdsodbc.so')
 
 UPLOAD_DIR = os.path.dirname(os.path.realpath(__file__)) + '/static/postPictures'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -36,7 +36,8 @@ app.config.update(
     MAIL_USE_SSL=True,
 
     # mail accounts
-    
+    MAIL_USERNAME='martinmravec4@gmail.com',
+    MAIL_PASSWORD='asdfghjkl123qwert'
 )
 
 login_manager = LoginManager()
@@ -67,6 +68,7 @@ def register():
     s = Session()
     s.add(user)
     s.commit()
+    s.close()
 
     token = generate_confirmation_token(user.email)
     confirm_url = url_for('confirm_email', token=token, _external=True)
@@ -102,6 +104,7 @@ def confirm_email(token):
         user.confirmed_on = datetime.utcnow()
         s.add(user)
         s.commit()
+        s.close()
         flash('You have confirmed your account. Thanks!', 'success')
     return redirect(url_for('index'))
 
@@ -121,6 +124,7 @@ def login():
     s = Session()
     registered_user = s.query(User).filter_by(username=username).first()
     confirmed_user = s.query(User).filter_by(confirmed=True).first()
+    s.close()
     if confirmed_user is None:
         flash('Your account has not been activated yet.', 'error')
         return redirect(url_for('login'))
@@ -207,7 +211,7 @@ def index():
     s = Session()
     post = s.query(Post).order_by(desc(Post.id))
     user = s.query(User).from_self().join(User.posts)
-
+    s.close()
     return render_template('index.html',  user=user, post=post)
 
 
@@ -222,6 +226,7 @@ def profile(id):
     comment = s.query(Comment).filter(Comment.user_id == id).count()
     positive = s.query(Comment).filter(Comment.user_id == id).filter(Comment.status == 'Positive').count()
     negative = s.query(Comment).filter(Comment.user_id == id).filter(Comment.status == 'Negative').count()
+    s.close()
     if id != current_user.id:
         return render_template('noAccess.html')
     return render_template('profile.html', post=post, comment=comment, positive=positive, negative=negative)
@@ -260,6 +265,7 @@ def post(id):
         comment = Comment(request.form['comment'], status, id, request.form['userId'])
         s.add(comment)
         s.commit()
+        s.close()
         flash('Thanks for post')
 
     post = s.query(Post).filter(Post.id == id)
@@ -328,6 +334,7 @@ def add_new_post():
 
             s.add(post)
             s.commit()
+            s.close()
             flash('Thanks for post')
         else:
             return render_template('error404.html')
