@@ -34,10 +34,6 @@ app.config.update(
     MAIL_PORT=465,
     MAIL_USE_TLS=False,
     MAIL_USE_SSL=True,
-
-    # mail accounts
-    MAIL_USERNAME='martinmravec4@gmail.com',
-    MAIL_PASSWORD='asdfghjkl123qwert'
 )
 
 login_manager = LoginManager()
